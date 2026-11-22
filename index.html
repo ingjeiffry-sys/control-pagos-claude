@@ -137,28 +137,32 @@ th.now{color:var(--acc)}
 footer{color:var(--muted);font-size:12.5px;text-align:center;padding:34px 0 40px}
 /* Contrato imprimible */
 #contrato{display:none}
-.doc{max-width:760px;margin:0 auto;background:#fff;color:#111;padding:48px 56px;font:14.5px/1.65 Georgia,"Times New Roman",serif;border-radius:4px;box-shadow:var(--shadow)}
-.doc h1{font-family:Georgia,serif;font-size:21px;text-align:center;text-transform:uppercase;letter-spacing:.04em;margin:0 0 4px}
-.doc .c{text-align:center;color:#444;margin:0 0 24px;font-size:13px}
-.doc table{font-size:14px;margin:12px 0 18px}
-.doc td{border:1px solid #bbb;padding:6px 10px;white-space:normal}
-.doc td:first-child{width:38%;background:#f4f4f4;font-weight:bold}
-.doc ol{padding-left:22px}
-.doc li{margin-bottom:8px;text-align:justify}
-.firmas{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:70px}
-.firmas div{border-top:1px solid #111;padding-top:6px;text-align:center;font-size:13px}
-.aviso{background:#fff4d6;border:1px solid #e6c46a;color:#6b4e00;padding:10px 14px;border-radius:8px;font-family:"Plus Jakarta Sans",sans-serif;font-size:13px;margin-bottom:16px}
+/* Copia del contrato firmado por los docentes (Contratos_Claude_4_para_imprimir.pdf): carta, timbrado, Times 11 */
+.hoja{width:8.5in;min-height:11in;margin:0 auto 18px;background:#fff;color:#000;padding:.3in .85in .6in;font:11pt/1.38 "Times New Roman",Times,serif;box-shadow:var(--shadow);position:relative}
+.timbre{display:grid;grid-template-columns:1.55in 1fr 1.35in;align-items:start;margin:0 -.6in 22px;text-align:center;font-family:Aptos,"Segoe UI",Calibri,Arial,sans-serif}
+.timbre img{width:100%;display:block}
+.timbre .nom{font-weight:700;font-size:21pt;line-height:1.1;margin-top:8px;white-space:nowrap}
+.timbre .dir{font-size:9pt;line-height:1.45;margin:6px -.05in 0 -.55in;white-space:nowrap}
+.timbre>div{position:relative;z-index:1}
+.hoja p{margin:0 0 9px;text-align:justify}
+.hoja .der{text-align:right;margin:0}
+.hoja .tit{text-align:center;font-weight:700;margin:16px 0 0}
+.hoja .cuenta{margin:0 0 6px 40px;line-height:1.6}
+.firmas{display:grid;grid-template-columns:1fr 1fr;gap:60px;margin:58px 30px 0;text-align:center;line-height:1.3}
+.firmas div::before{content:"";display:block;border-top:1px solid #000;margin-bottom:3px}
 @media print{
+  html,body{background:#fff!important}
   body *{visibility:hidden}
   #contrato,#contrato *{visibility:visible}
   #contrato{position:absolute;left:0;top:0;width:100%}
-  .doc{box-shadow:none;padding:0;max-width:none}
+  .hoja{box-shadow:none;margin:0;min-height:auto;page-break-after:always;break-after:page}
+  .hoja:last-child{page-break-after:auto;break-after:auto}
   .noprint{display:none!important}
-  @page{margin:2cm}
+  @page{size:letter;margin:0}
 }
 </style>
 </head>
-<body>
+<body data-admin="false" data-vista="">
 <div class="wrap">
   <header>
     <div class="brand">
@@ -291,6 +295,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:34px 0 40px
     <div class="field"><label>Nombre</label><input type="text" name="Nombre" required maxlength="80"></div>
     <div class="grid g2" style="gap:12px">
       <div class="field"><label>Rol / área</label><input type="text" name="Rol" maxlength="60"></div>
+      <div class="field"><label>Trato en el contrato</label><select name="Trato"><option>señor</option><option>señora</option></select></div>
       <div class="field"><label>Estado</label><select name="Estado"></select></div>
       <div class="field"><label>WhatsApp</label><input type="tel" name="Telefono"></div>
       <div class="field"><label>Correo</label><input type="email" name="Correo"></div>
@@ -309,14 +314,15 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:34px 0 40px
 <!-- Contrato imprimible -->
 <div id="contrato">
   <div class="wrap noprint" style="padding:18px 16px;display:flex;gap:10px;justify-content:center"><button class="btn" onclick="cerrarContrato()">← Volver</button><button class="btn pri" onclick="window.print()">🖨️ Imprimir</button></div>
-  <div class="doc" id="docC"></div>
+  <div id="docC"></div>
   <div style="height:40px" class="noprint"></div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-const ES_ADMIN = 'false' === 'true'; // Apps Script imprime los valores como texto dentro de <script>
+// Valores de la plantilla por atributos HTML: dentro de <script> Apps Script los imprime con comillas propias ('' → '''')
+const ES_ADMIN = document.body.dataset.admin === 'true';
 const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const ETQ = {pagado:'Pagado',revision:'Por revisar',vencido:'Vencido',pendiente:'Pendiente',futuro:'Próximo',na:'—'};
 let PUB = null, ADM = null;
@@ -463,7 +469,6 @@ function pintarAdmin(d){
   $('#aSolN').textContent = sol.length;
   $('#aLink').value = d.urlInscripcion;
   $('#aWa').href = 'https://wa.me/?text=' + encodeURIComponent('Si quieres Claude de pago (RD$ 600 al mes), inscríbete aquí: ' + d.urlInscripcion);
-  $('#aContrato').value = d.contrato.join('\n');
   $('#aHoja').href = d.hojaUrl; $('#aCarpeta').href = d.carpetaUrl;
   $('#aCorreo').textContent = 'Sesión: ' + d.correo;
   pintarTabla();
@@ -531,7 +536,7 @@ function editarMemb(id){
   mId = id || '';
   const f = $('#fMemb');
   f.Estado.innerHTML = ADM.estados.map(s => `<option>${s}</option>`).join('');
-  ['Nombre','Rol','Estado','Telefono','Correo','CuentaClaude','InicioCobro','ContratoFirmado','Notas'].forEach(k => f[k].value = m[k] || '');
+  ['Nombre','Rol','Trato','Estado','Telefono','Correo','CuentaClaude','InicioCobro','ContratoFirmado','Notas'].forEach(k => f[k].value = m[k] || '');
   $('#mTit').textContent = id ? m.Nombre : 'Nueva membresía';
   $('#mSub').textContent = id ? 'ID ' + m.ID + ' · inscrito ' + (m.FechaInscripcion || '—') : 'Para alguien que no llenó el formulario o una membresía adicional.';
   $('#mBorrar').style.display = id ? '' : 'none';
@@ -547,7 +552,7 @@ function activar(id){
 $('#fMemb').onsubmit = async e => {
   e.preventDefault();
   const b = $('#fMemb button[type=submit]'), f = e.target, o = {ID: mId};
-  ['Nombre','Rol','Estado','Telefono','Correo','CuentaClaude','InicioCobro','ContratoFirmado','Notas'].forEach(k => o[k] = f[k].value);
+  ['Nombre','Rol','Trato','Estado','Telefono','Correo','CuentaClaude','InicioCobro','ContratoFirmado','Notas'].forEach(k => o[k] = f[k].value);
   cargando(b, true);
   try { pintarAdmin(await api('guardarMembresia', o)); dMemb.close(); toast('Membresía guardada.'); }
   catch(err){ toast(msg(err), true); }
@@ -559,23 +564,8 @@ $('#mBorrar').onclick = async () => {
 };
 $('#mContrato').onclick = () => { dMemb.close(); verContrato(mId); };
 
-async function guardarContrato(){
-  try { pintarAdmin(await api('guardarContrato', $('#aContrato').value.split('\n'))); toast('Cláusulas guardadas.'); } catch(e){ toast(msg(e), true); }
-}
-
 function verContrato(id){
-  const m = memb(id), d = ADM;
-  const fecha = new Date(d.hoy + 'T12:00').toLocaleDateString('es-DO', {day:'numeric', month:'long', year:'numeric'});
-  const filas = [['Titular de la membresía', m.Nombre], ['Rol / área', m.Rol], ['WhatsApp', m.Telefono], ['Correo', m.Correo],
-    ['Cuenta de Claude', m.CuentaClaude || '________________________'], ['Código de membresía', m.ID],
-    ['Cuota mensual', rd(d.monto) + ' por membresía'], ['Vencimiento', 'Día ' + d.dia + ' de cada mes'],
-    ['Inicio del cobro', m.InicioCobro ? nMes(m.InicioCobro) : '—'], ['Formas de pago', d.metodos.join(' · ')]];
-  $('#docC').innerHTML = (d.contrato.length ? '' : '<div class="aviso noprint">Faltan las cláusulas del contrato. Escríbelas en Administración → Contrato antes de imprimir.</div>') +
-    `<h1>Contrato de Suscripción Mensual — Claude de pago</h1><p class="c">Politécnico Cristiano James Davis · La Vega, República Dominicana</p>
-    <p>En La Vega, a ${esc(fecha)}, entre el <b>Prof. Jeiffry García</b>, Coordinador TIC, quien administra la suscripción, y <b>${esc(m.Nombre)}</b>, titular de la membresía, se acuerda lo siguiente:</p>
-    <table>${filas.map(([a, b]) => `<tr><td>${esc(a)}</td><td>${esc(b)}</td></tr>`).join('')}</table>
-    ${d.contrato.length ? `<h3 style="font-family:Georgia,serif">Cláusulas</h3><ol>${d.contrato.map(c => `<li>${esc(c)}</li>`).join('')}</ol>` : ''}
-    <div class="firmas"><div>${esc(m.Nombre)}<br>Titular de la membresía</div><div>Prof. Jeiffry García<br>Administrador</div></div>`;
+  $('#docC').innerHTML = window.htmlContrato(memb(id), ADM.hoy); // plantilla en Contrato.html (solo Administración)
   document.querySelector('.wrap').style.display = 'none';
   $('#contrato').style.display = 'block'; window.scrollTo(0, 0);
 }
@@ -588,10 +578,10 @@ function copiarLink(){
 }
 
 // Apps Script envuelve este script en una función: los onclick="" del HTML solo ven lo que esté en window
-Object.assign(window, {ir, editarMemb, activar, abrirPago, accionPago, guardarContrato, copiarLink, verContrato, cerrarContrato, dPago, dMemb});
+Object.assign(window, {ir, editarMemb, activar, abrirPago, accionPago, copiarLink, verContrato, cerrarContrato, dPago, dMemb});
 
 iniciar();
-const VISTA = '' || new URLSearchParams(location.search).get('v') || '';
+const VISTA = document.body.dataset.vista || new URLSearchParams(location.search).get('v') || '';
 if (['inscripcion','comprobante','estado'].includes(VISTA)) ir(VISTA);
 else if (ES_ADMIN) ir('admin');
 </script>
