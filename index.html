@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<title>Control de Pagos Claude</title>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F4EE; --card:#FFFFFF; --ink:#1F1D1A; --muted:#6F6A61; --line:#E7E1D6; --soft:#F1ECE3;
+  --acc:#C9643F; --acc-2:#E08A5F; --acc-ink:#FFFFFF; --acc-soft:#FBE9DF;
+  --ok:#2F7D55; --ok-soft:#E1F1E7; --warn:#B7791F; --warn-soft:#FBF0D9; --bad:#B83A2A; --bad-soft:#FBE3DF;
+  --info:#3A64B8; --info-soft:#E3EBFA; --shadow:0 1px 2px rgba(40,30,20,.05),0 8px 24px rgba(40,30,20,.06);
+  --r:16px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#171513; --card:#211E1B; --ink:#F2EDE6; --muted:#A79F94; --line:#38332D; --soft:#2A2622;
+  --acc:#E0805A; --acc-2:#F09A72; --acc-ink:#1A1410; --acc-soft:#3A271E;
+  --ok:#5CC08A; --ok-soft:#1E3328; --warn:#E5AE52; --warn-soft:#3A2F1A; --bad:#EE7A68; --bad-soft:#3D2420;
+  --info:#7FA2EE; --info-soft:#1F2A40; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Plus Jakarta Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--acc)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+header{padding:28px 0 8px}
+.brand{display:flex;align-items:center;gap:14px}
+.mark{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--acc),var(--acc-2));display:grid;place-items:center;box-shadow:var(--shadow);flex:none}
+.mark svg{width:26px;height:26px;fill:#fff}
+h1{font-family:Fraunces,serif;font-weight:650;font-size:clamp(24px,4vw,34px);letter-spacing:-.02em;margin:0;line-height:1.1}
+.sub{color:var(--muted);font-size:14px;margin-top:2px}
+.chip-admin{margin-left:auto;background:var(--ink);color:var(--bg);font-size:12px;font-weight:600;padding:6px 12px;border-radius:999px;white-space:nowrap}
+nav{display:flex;gap:6px;margin:20px 0 22px;overflow-x:auto;padding:4px;background:var(--soft);border-radius:14px;scrollbar-width:none}
+nav button{border:0;background:transparent;padding:9px 16px;border-radius:10px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+nav button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+section{display:none;animation:fade .25s ease}
+section.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.g5{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+h2{font-family:Fraunces,serif;font-weight:600;font-size:22px;margin:0 0 4px;letter-spacing:-.01em}
+h3{font-size:15px;margin:0 0 6px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+@media(max-width:760px){.hero{grid-template-columns:1fr}}
+.price{font-family:Fraunces,serif;font-size:56px;font-weight:650;letter-spacing:-.03em;line-height:1}
+.price small{font-family:"Plus Jakarta Sans";font-size:16px;font-weight:500;color:var(--muted);letter-spacing:0}
+.hero .card:first-child{background:linear-gradient(160deg,var(--acc-soft),var(--card) 70%)}
+.due{display:flex;align-items:center;gap:14px;margin-top:18px;padding:14px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.due b{font-size:26px;font-family:Fraunces,serif}
+.method{display:flex;gap:12px;align-items:flex-start}
+.method .ic{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:none;font-size:18px;background:var(--acc-soft)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--card);padding:10px 16px;border-radius:11px;font-weight:600;cursor:pointer;text-decoration:none;color:var(--ink)}
+.btn:hover{border-color:var(--muted)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.btn.pri:hover{filter:brightness(1.05)}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.btn.danger{color:var(--bad);border-color:var(--bad-soft)}
+.btn.sm{padding:6px 11px;font-size:13px;border-radius:9px}
+.btn:disabled{opacity:.55;cursor:progress}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+label{display:block;font-weight:600;font-size:13px;margin:0 0 6px}
+.field{margin-bottom:16px}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=month],input[type=number],select,textarea{
+  width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:var(--card);outline:none;transition:border .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 4px var(--acc-soft)}
+textarea{min-height:90px;resize:vertical}
+.hint{font-size:12.5px;color:var(--muted);margin-top:5px}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:500;font-size:14px}
+.check input{margin-top:3px;accent-color:var(--acc);width:17px;height:17px}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{border:1px solid var(--line);background:var(--card);padding:7px 12px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;user-select:none}
+.pill.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.pill.dis{opacity:.45;cursor:not-allowed;text-decoration:line-through}
+.radio{display:grid;gap:8px}
+.radio label{display:flex;gap:10px;align-items:center;font-weight:500;font-size:14px;border:1px solid var(--line);padding:10px 12px;border-radius:11px;cursor:pointer;margin:0}
+.radio input{accent-color:var(--acc)}
+.radio label:has(input:checked){border-color:var(--acc);background:var(--acc-soft)}
+.drop{border:2px dashed var(--line);border-radius:14px;padding:22px;text-align:center;cursor:pointer;transition:.15s;background:var(--soft)}
+.drop:hover,.drop.over{border-color:var(--acc);background:var(--acc-soft)}
+.drop input{display:none}
+.st{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.st::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.st.pagado{color:var(--ok);background:var(--ok-soft)}
+.st.revision{color:var(--info);background:var(--info-soft)}
+.st.vencido{color:var(--bad);background:var(--bad-soft)}
+.st.pendiente{color:var(--warn);background:var(--warn-soft)}
+.st.futuro,.st.na{color:var(--muted);background:var(--soft)}
+.timeline{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:14px}
+.tl{border:1px solid var(--line);border-radius:12px;padding:12px}
+.tl b{display:block;text-transform:capitalize;margin-bottom:6px;font-size:14px}
+.kpi{padding:18px}
+.kpi .n{font-family:Fraunces,serif;font-size:30px;font-weight:650;line-height:1.1;margin-top:4px}
+.kpi .l{font-size:12.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--card);box-shadow:var(--shadow);max-height:70vh}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5px}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+thead th{position:sticky;top:0;background:var(--soft);z-index:2;font-size:12px;color:var(--muted);text-transform:capitalize}
+td.nm,th.nm{position:sticky;left:0;background:var(--card);z-index:1;min-width:190px;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+thead th.nm{z-index:3;background:var(--soft)}
+td.nm a{color:var(--ink);font-weight:600;text-decoration:none;cursor:pointer}
+td.nm a:hover{color:var(--acc)}
+td.c{text-align:center;padding:5px}
+.cell{width:30px;height:30px;border-radius:9px;border:0;cursor:pointer;display:inline-grid;place-items:center;font-size:13px;font-weight:700}
+.cell.pagado{background:var(--ok-soft);color:var(--ok)}
+.cell.revision{background:var(--info-soft);color:var(--info)}
+.cell.vencido{background:var(--bad-soft);color:var(--bad)}
+.cell.pendiente{background:var(--warn-soft);color:var(--warn)}
+.cell.futuro{background:transparent;border:1px dashed var(--line);color:var(--muted)}
+.cell.na{background:transparent;color:var(--line);cursor:default}
+th.now{color:var(--acc)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.sol{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.sol:last-child{border-bottom:0}
+.modal{position:fixed;inset:0;z-index:50;display:none;place-items:center;padding:12px;background:rgba(20,15,10,.45);backdrop-filter:blur(3px)}
+.modal.on{display:grid}
+.modal>.dlg{background:var(--card);color:var(--ink);border-radius:20px;width:min(560px,100%);box-shadow:0 30px 80px rgba(0,0,0,.3);animation:fade .2s ease}
+.dlg{padding:24px;overflow:auto;max-height:calc(100vh - 32px)}
+.dlg-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}
+.x{border:0;background:var(--soft);width:34px;height:34px;border-radius:10px;cursor:pointer;font-size:18px;flex:none}
+.box{background:var(--soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:14px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;opacity:0;transition:.25s;pointer-events:none;z-index:99;max-width:calc(100vw - 32px)}
+#toast.on{opacity:1;transform:translateX(-50%)}
+#toast.err{background:var(--bad);color:#fff}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.ok-big{text-align:center;padding:30px 10px}
+.ok-big .ic{font-size:44px}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+footer{color:var(--muted);font-size:12.5px;text-align:center;padding:34px 0 40px}
+/* Contrato imprimible */
+#contrato{display:none}
+.doc{max-width:760px;margin:0 auto;background:#fff;color:#111;padding:48px 56px;font:14.5px/1.65 Georgia,"Times New Roman",serif;border-radius:4px;box-shadow:var(--shadow)}
+.doc h1{font-family:Georgia,serif;font-size:21px;text-align:center;text-transform:uppercase;letter-spacing:.04em;margin:0 0 4px}
+.doc .c{text-align:center;color:#444;margin:0 0 24px;font-size:13px}
+.doc table{font-size:14px;margin:12px 0 18px}
+.doc td{border:1px solid #bbb;padding:6px 10px;white-space:normal}
+.doc td:first-child{width:38%;background:#f4f4f4;font-weight:bold}
+.doc ol{padding-left:22px}
+.doc li{margin-bottom:8px;text-align:justify}
+.firmas{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:70px}
+.firmas div{border-top:1px solid #111;padding-top:6px;text-align:center;font-size:13px}
+.aviso{background:#fff4d6;border:1px solid #e6c46a;color:#6b4e00;padding:10px 14px;border-radius:8px;font-family:"Plus Jakarta Sans",sans-serif;font-size:13px;margin-bottom:16px}
+@media print{
+  body *{visibility:hidden}
+  #contrato,#contrato *{visibility:visible}
+  #contrato{position:absolute;left:0;top:0;width:100%}
+  .doc{box-shadow:none;padding:0;max-width:none}
+  .noprint{display:none!important}
+  @page{margin:2cm}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="mark"><svg viewBox="0 0 24 24"><path d="M12 2l1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z" opacity=".8"/></svg></div>
+      <div>
+        <h1>Control de Pagos Claude</h1>
+        <div class="sub">Membresías de Claude de pago · Politécnico Cristiano James Davis</div>
+      </div>
+      
+    </div>
+  </header>
+
+  <nav id="nav">
+    <button data-s="inicio" class="on">Inicio</button>
+    <button data-s="inscripcion">Inscribirme</button>
+    <button data-s="comprobante">Subir comprobante</button>
+    <button data-s="estado">Mi estado</button>
+    
+  </nav>
+
+  <!-- INICIO -->
+  <section id="inicio" class="on">
+    <div class="hero">
+      <div class="card">
+        <div class="muted small" style="font-weight:600;text-transform:uppercase;letter-spacing:.06em">Cuota mensual por membresía</div>
+        <div class="price" style="margin-top:8px">RD$ 600 <small>/ mes</small></div>
+        <p class="muted" style="max-width:46ch">Claude de pago para los compañeros del centro. Cada membresía es una cuenta; una persona puede tener más de una.</p>
+        <div class="due">
+          <div style="font-size:26px">📅</div>
+          <div><div class="muted small">Próximo vencimiento</div><b id="proxVence">25</b></div>
+        </div>
+        <div class="row" style="margin-top:18px">
+          <button class="btn pri" onclick="ir('inscripcion')">Quiero inscribirme</button>
+          <button class="btn" onclick="ir('comprobante')">Subir comprobante</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2 style="font-size:17px">Formas de pago</h2>
+        <div class="grid" style="gap:14px;margin-top:12px">
+          <div class="method"><div class="ic">🏦</div><div><b>Transferencia a la Fundación Tears</b><div class="muted small">Luego sube tu comprobante aquí o envíalo al docente por WhatsApp.</div></div></div>
+          <div class="method"><div class="ic">💵</div><div><b>Efectivo al docente</b><div class="muted small">El Prof. Jeiffry García recibe el efectivo y hace la transferencia.</div></div></div>
+          <div class="method"><div class="ic">🤝</div><div><b>Efectivo a Ana María</b><div class="muted small">Directamente en la Fundación Tears.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSCRIPCIÓN -->
+  <section id="inscripcion">
+    <div class="grid g2" style="align-items:start">
+      <form class="card" id="fIns" autocomplete="on">
+        <h2>Inscripción</h2>
+        <p class="muted small" style="margin-top:0">Llena el formulario y el docente te contactará cuando tu cuenta de Claude esté lista para firmar el contrato.</p>
+        <div class="field"><label for="iNombre">Nombre y apellido</label><input type="text" id="iNombre" required maxlength="80" autocomplete="name"></div>
+        <div class="grid g2" style="gap:12px">
+          <div class="field"><label for="iRol">Rol / área</label><input type="text" id="iRol" value="Docente" maxlength="60"></div>
+          <div class="field"><label for="iCant">Membresías</label><select id="iCant"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+        </div>
+        <div class="grid g2" style="gap:12px">
+          <div class="field"><label for="iTel">WhatsApp</label><input type="tel" id="iTel" required placeholder="809-000-0000" autocomplete="tel"></div>
+          <div class="field"><label for="iCorreo">Correo</label><input type="email" id="iCorreo" required autocomplete="email"><div class="hint">Para crear tu cuenta de Claude.</div></div>
+        </div>
+        <div class="field"><label>¿Cómo vas a pagar?</label><div class="radio" id="iMetodo"></div></div>
+        <div class="field"><label for="iNotas">Comentario (opcional)</label><textarea id="iNotas" maxlength="300" style="min-height:64px"></textarea></div>
+        <div class="field"><label class="check"><input type="checkbox" id="iAcepto"> <span>Acepto pagar <b>RD$ 600 al mes por cada membresía</b>, a más tardar el <b>día 25</b> de cada mes, y firmar el contrato cuando se cree la cuenta.</span></label></div>
+        <button class="btn pri" type="submit" style="width:100%">Enviar inscripción</button>
+      </form>
+      <div class="card">
+        <h3>¿Cómo funciona?</h3>
+        <ol class="muted" style="padding-left:18px;margin:8px 0 0">
+          <li>Te inscribes aquí.</li>
+          <li>El docente crea tu cuenta de Claude de pago.</li>
+          <li>Firmas el contrato impreso.</li>
+          <li>Pagas RD$ 600 cada mes antes del día 25 y subes tu comprobante.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPROBANTE -->
+  <section id="comprobante">
+    <div class="grid g2" style="align-items:start">
+      <form class="card" id="fCom">
+        <h2>Subir comprobante</h2>
+        <p class="muted small" style="margin-top:0">Para quien pagó por transferencia a la Fundación Tears. El docente lo revisa y lo confirma.</p>
+        <div class="field"><label for="cMemb">Tu nombre</label><select id="cMemb" required></select></div>
+        <div class="field"><label>Meses que pagaste</label><div class="pills" id="cMeses"><span class="muted small">Elige tu nombre primero.</span></div><div class="hint" id="cTotal"></div></div>
+        <div class="field"><label>Comprobante</label>
+          <label class="drop" id="cDrop"><input type="file" id="cFile" accept="image/*,application/pdf"><div style="font-size:26px">📎</div><div id="cFileTxt"><b>Toca para elegir</b> la foto o el PDF<br><span class="muted small">Máximo 8 MB</span></div></label>
+        </div>
+        <div class="field"><label for="cNotas">Nota (opcional)</label><input type="text" id="cNotas" maxlength="200" placeholder="Ej.: número de referencia"></div>
+        <button class="btn pri" type="submit" style="width:100%">Enviar comprobante</button>
+      </form>
+      <div class="card" id="cEstado"><h3>Tu estado</h3><p class="muted small">Elige tu nombre para ver tus meses.</p></div>
+    </div>
+  </section>
+
+  <!-- ESTADO -->
+  <section id="estado">
+    <div class="card">
+      <h2>Mi estado de cuenta</h2>
+      <div class="field" style="max-width:420px;margin-top:12px"><label for="eMemb">Tu nombre</label><select id="eMemb"></select></div>
+      <div id="eOut"></div>
+    </div>
+  </section>
+
+  
+
+  <footer>Control de Pagos Claude · Prof. Jeiffry García · Coordinación TIC</footer>
+</div>
+
+<!-- Diálogo de pago -->
+<div class="modal" id="dPago"><div class="dlg">
+  <div class="dlg-h"><div><h2 id="pTit">Registrar pago</h2><div class="muted small" id="pSub"></div></div><button class="x" onclick="dPago.close()">×</button></div>
+  <div id="pExiste"></div>
+  <div class="field"><label>Meses</label><div class="pills" id="pMeses"></div></div>
+  <div class="field"><label>Método de pago</label><div class="radio" id="pMetodo"></div></div>
+  <div class="grid g2" style="gap:12px">
+    <div class="field"><label for="pFecha">Fecha</label><input type="date" id="pFecha"></div>
+    <div class="field"><label for="pFile">Comprobante (opcional)</label><input type="file" id="pFile" accept="image/*,application/pdf" style="padding:8px"></div>
+  </div>
+  <div class="field"><label for="pNotas">Nota</label><input type="text" id="pNotas" maxlength="200"></div>
+  <div class="row" style="justify-content:flex-end"><button class="btn" onclick="dPago.close()">Cancelar</button><button class="btn pri" id="pGuardar">Guardar pago</button></div>
+</div></div>
+
+<!-- Diálogo de membresía -->
+<div class="modal" id="dMemb"><div class="dlg">
+  <div class="dlg-h"><div><h2 id="mTit">Membresía</h2><div class="muted small" id="mSub"></div></div><button class="x" onclick="dMemb.close()">×</button></div>
+  <form id="fMemb">
+    <div class="field"><label>Nombre</label><input type="text" name="Nombre" required maxlength="80"></div>
+    <div class="grid g2" style="gap:12px">
+      <div class="field"><label>Rol / área</label><input type="text" name="Rol" maxlength="60"></div>
+      <div class="field"><label>Estado</label><select name="Estado"></select></div>
+      <div class="field"><label>WhatsApp</label><input type="tel" name="Telefono"></div>
+      <div class="field"><label>Correo</label><input type="email" name="Correo"></div>
+      <div class="field"><label>Cuenta de Claude</label><input type="email" name="CuentaClaude" placeholder="correo de la cuenta creada"></div>
+      <div class="field"><label>Empieza a pagar</label><input type="month" name="InicioCobro"></div>
+      <div class="field"><label>Contrato firmado el</label><input type="date" name="ContratoFirmado"></div>
+    </div>
+    <div class="field"><label>Notas</label><textarea name="Notas" maxlength="300" style="min-height:60px"></textarea></div>
+    <div class="row" style="justify-content:space-between">
+      <div class="row"><button type="button" class="btn danger sm" id="mBorrar">Borrar</button><button type="button" class="btn sm" id="mContrato">🖨️ Imprimir contrato</button></div>
+      <div class="row"><button type="button" class="btn" onclick="dMemb.close()">Cancelar</button><button class="btn pri" type="submit">Guardar</button></div>
+    </div>
+  </form>
+</div></div>
+
+<!-- Contrato imprimible -->
+<div id="contrato">
+  <div class="wrap noprint" style="padding:18px 16px;display:flex;gap:10px;justify-content:center"><button class="btn" onclick="cerrarContrato()">← Volver</button><button class="btn pri" onclick="window.print()">🖨️ Imprimir</button></div>
+  <div class="doc" id="docC"></div>
+  <div style="height:40px" class="noprint"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const ES_ADMIN = 'false' === 'true'; // Apps Script imprime los valores como texto dentro de <script>
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const ETQ = {pagado:'Pagado',revision:'Por revisar',vencido:'Vencido',pendiente:'Pendiente',futuro:'Próximo',na:'—'};
+let PUB = null, ADM = null;
+
+const $ = s => document.querySelector(s);
+window.addEventListener('error', e => toast('Error: ' + e.message, true));
+// capas en vez de <dialog>: showModal no se ve dentro del iframe de Apps Script
+const dPago = $('#dPago'), dMemb = $('#dMemb');
+[dPago, dMemb].forEach(d => {
+  d.showModal = () => d.classList.add('on');
+  d.close = () => d.classList.remove('on');
+  d.addEventListener('click', e => { if (e.target === d) d.close(); });
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { dPago.close(); dMemb.close(); } });
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nMes = m => MESES[+m.slice(5,7)-1] + ' ' + m.slice(0,4);
+const nMesC = m => MESES[+m.slice(5,7)-1].slice(0,3) + ' ' + m.slice(2,4);
+const rd = n => 'RD$ ' + Number(n).toLocaleString('es-DO');
+// Dentro de Apps Script: google.script.run. En GitHub Pages: fetch sin cookies a la API (doPost).
+const API_URL = 'https://script.google.com/macros/s/AKfycbwpf4CfR0Gd1qOc5_iugbsOeE3cUL0r40TkNccN0swhSxSA3jXdv-R0kltrE1a9Ogba/exec';
+const api = (fn, ...a) => (window.google && google.script)
+  ? new Promise((ok, ko) => google.script.run.withSuccessHandler(ok).withFailureHandler(ko)[fn](...a))
+  : fetch(API_URL, {method: 'POST', credentials: 'omit', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({fn, args: a})})
+      .then(r => r.json()).then(r => { if (!r.ok) throw new Error(r.error); return r.datos; });
+function toast(t, err){ const e = $('#toast'); e.textContent = t; e.className = 'on' + (err ? ' err' : ''); clearTimeout(e._t); e._t = setTimeout(() => e.className = '', err ? 6000 : 3500); }
+function cargando(btn, on){ if(on){ btn._t = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Un momento…'; } else { btn.disabled = false; btn.innerHTML = btn._t; } }
+const msg = e => (e && e.message ? e.message : String(e)).replace(/^Error:\s*/, '');
+
+function ir(s){
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.s === s));
+  document.querySelectorAll('section').forEach(x => x.classList.toggle('on', x.id === s));
+  if (s === 'admin' && !ADM) cargarAdmin();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+$('#nav').onclick = e => { if (e.target.dataset.s) ir(e.target.dataset.s); };
+
+function radios(el, name, ops, sel){
+  el.innerHTML = ops.map(o => `<label><input type="radio" name="${name}" value="${esc(o)}" ${o===sel?'checked':''}> ${esc(o)}</label>`).join('');
+}
+const radioVal = name => (document.querySelector(`input[name="${name}"]:checked`) || {}).value || '';
+
+function leerArchivo(f){
+  return new Promise((ok, ko) => {
+    if (!f) return ok(null);
+    if (f.size > 8*1024*1024) return ko(new Error('El archivo pesa más de 8 MB.'));
+    const r = new FileReader();
+    r.onload = () => ok({nombre: f.name, tipo: f.type || 'application/octet-stream', datos: String(r.result).split(',')[1]});
+    r.onerror = () => ko(new Error('No se pudo leer el archivo.'));
+    r.readAsDataURL(f);
+  });
+}
+
+// ─────────── Público ───────────
+async function iniciar(){
+  try {
+    PUB = await api('datosPublicos');
+    const pv = PUB.mesProximo;
+    $('#proxVence').textContent = PUB.dia + ' de ' + MESES[+pv.slice(5,7)-1];
+    radios($('#iMetodo'), 'iMet', PUB.metodos, PUB.metodos[0]);
+    const ops = '<option value="">— Elige —</option>' + PUB.membresias.map(m => `<option value="${m.id}">${esc(m.nombre)}</option>`).join('');
+    $('#cMemb').innerHTML = ops; $('#eMemb').innerHTML = ops;
+  } catch(e){ toast(msg(e), true); }
+}
+
+$('#fIns').onsubmit = async e => {
+  e.preventDefault();
+  const b = e.submitter || $('#fIns button[type=submit]');
+  cargando(b, true);
+  try {
+    const r = await api('inscribir', {nombre: $('#iNombre').value, rol: $('#iRol').value, telefono: $('#iTel').value,
+      correo: $('#iCorreo').value, cantidad: +$('#iCant').value, metodo: radioVal('iMet'), notas: $('#iNotas').value, acepto: $('#iAcepto').checked});
+    $('#fIns').innerHTML = `<div class="ok-big"><div class="ic">🎉</div><h2>¡Inscripción recibida!</h2><p class="muted">${r.cantidad} membresía${r.cantidad>1?'s':''} en solicitud. El docente te avisará cuando tu cuenta de Claude esté lista para firmar el contrato.</p></div>`;
+  } catch(err){ toast(msg(err), true); cargando(b, false); }
+};
+
+let selMeses = new Set();
+async function cargarEstado(id, destino, conPills){
+  destino.innerHTML = '<div class="empty"><span class="spin"></span></div>';
+  if (conPills) $('#cMeses').innerHTML = '<span class="spin"></span>';
+  try {
+    const s = await api('estadoPublico', id);
+    destino.innerHTML = `<div class="row" style="justify-content:space-between;margin:10px 0 0"><div><h3 style="margin:0">${esc(s.nombre)}</h3><div class="muted small">Paga desde ${nMes(s.inicio)}</div></div>
+      ${s.deuda ? `<span class="st vencido">Debe ${rd(s.deuda)}</span>` : '<span class="st pagado">Al día</span>'}</div>
+      <div class="timeline">${s.meses.map(m => `<div class="tl"><b>${nMes(m.mes)}</b><span class="st ${m.e}">${ETQ[m.e]}</span></div>`).join('')}</div>`;
+    if (conPills){
+      selMeses = new Set();
+      const libres = s.meses.filter(m => ['vencido','pendiente','futuro'].includes(m.e));
+      $('#cMeses').innerHTML = libres.length ? libres.map(m => `<span class="pill" data-m="${m.mes}">${nMes(m.mes)}</span>`).join('') : '<span class="muted small">No tienes meses pendientes. 🎉</span>';
+      const sug = libres.find(m => m.e !== 'futuro') || libres[0];
+      if (sug){ selMeses.add(sug.mes); $(`#cMeses .pill[data-m="${sug.mes}"]`).classList.add('on'); }
+      totalCom();
+    }
+  } catch(e){ destino.innerHTML = `<p class="muted">${esc(msg(e))}</p>`; }
+}
+function totalCom(){ $('#cTotal').textContent = selMeses.size ? `${selMeses.size} mes${selMeses.size>1?'es':''} · total ${rd(selMeses.size*(PUB?PUB.monto:600))}` : ''; }
+$('#cMeses').onclick = e => { const p = e.target.closest('.pill'); if(!p) return; const m = p.dataset.m; selMeses.has(m) ? selMeses.delete(m) : selMeses.add(m); p.classList.toggle('on'); totalCom(); };
+$('#cMemb').onchange = e => e.target.value ? cargarEstado(e.target.value, $('#cEstado'), true) : null;
+$('#eMemb').onchange = e => e.target.value ? cargarEstado(e.target.value, $('#eOut'), false) : ($('#eOut').innerHTML = '');
+$('#cFile').onchange = e => { const f = e.target.files[0]; $('#cFileTxt').innerHTML = f ? `<b>${esc(f.name)}</b><br><span class="muted small">${(f.size/1024/1024).toFixed(1)} MB · toca para cambiar</span>` : '<b>Toca para elegir</b> la foto o el PDF'; };
+['dragover','dragleave','drop'].forEach(t => $('#cDrop').addEventListener(t, e => { e.preventDefault(); $('#cDrop').classList.toggle('over', t==='dragover'); if (t==='drop' && e.dataTransfer.files[0]){ $('#cFile').files = e.dataTransfer.files; $('#cFile').onchange({target:$('#cFile')}); } }));
+
+$('#fCom').onsubmit = async e => {
+  e.preventDefault();
+  const b = $('#fCom button[type=submit]');
+  if (!$('#cMemb').value) return toast('Elige tu nombre.', true);
+  if (!selMeses.size) return toast('Elige al menos un mes.', true);
+  if (!$('#cFile').files[0]) return toast('Adjunta el comprobante.', true);
+  cargando(b, true);
+  try {
+    const archivo = await leerArchivo($('#cFile').files[0]);
+    const r = await api('subirComprobante', {membresiaId: $('#cMemb').value, meses: [...selMeses], archivo, notas: $('#cNotas').value});
+    toast('¡Comprobante enviado! El docente lo revisará.');
+    $('#cFile').value = ''; $('#cNotas').value = ''; $('#cFile').onchange({target:$('#cFile')});
+    cargarEstado($('#cMemb').value, $('#cEstado'), true);
+  } catch(err){ toast(msg(err), true); }
+  cargando(b, false);
+};
+
+// ─────────── Administración ───────────
+async function cargarAdmin(){
+  try { pintarAdmin(await api('datosAdmin')); }
+  catch(e){ $('#aCarga').innerHTML = esc(msg(e)); }
+}
+function pintarAdmin(d){
+  ADM = d;
+  $('#aCarga').style.display = 'none'; $('#aBody').style.display = '';
+  const act = d.membresias.filter(m => m.Estado === 'Activa');
+  const pv = d.mesProximo;
+  const pagPv = act.filter(m => m.meses[pv] && m.meses[pv].e === 'pagado').length;
+  const deuda = d.membresias.reduce((s, m) => s + m.deuda, 0);
+  const conDeuda = d.membresias.filter(m => m.deuda > 0).length;
+  const rev = d.membresias.reduce((s, m) => s + Object.values(m.meses).filter(x => x.e === 'revision').length, 0);
+  const sol = d.membresias.filter(m => m.Estado === 'Solicitud');
+  const personas = new Set(act.map(m => m.Nombre.toLowerCase())).size;
+  $('#aKpi').innerHTML = [
+    ['Membresías activas', act.length, personas + ' persona' + (personas===1?'':'s')],
+    ['Pagado ' + nMes(pv), pagPv + ' / ' + act.length, rd(pagPv * d.monto) + ' de ' + rd(act.length * d.monto)],
+    ['Vencido', rd(deuda), conDeuda + ' membresía' + (conDeuda===1?'':'s') + ' con deuda'],
+    ['Por revisar', rev, 'comprobantes subidos'],
+    ['Solicitudes', sol.length, 'esperando cuenta']
+  ].map(([l, n, s], i) => `<div class="card kpi"><div class="l">${l}</div><div class="n" style="${i===2&&deuda?'color:var(--bad)':''}${i===3&&rev?'color:var(--info)':''}">${n}</div><div class="muted small">${s}</div></div>`).join('');
+  $('#aSol').innerHTML = sol.length ? sol.map(m => `<div class="sol"><div><b>${esc(m.Nombre)}</b> <span class="muted small">· ${esc(m.Rol)} · ${esc(m.Telefono)} · ${esc(m.Correo)}</span><div class="muted small">${esc(m.FechaInscripcion)} ${m.Notas ? '· ' + esc(m.Notas) : ''}</div></div>
+    <div class="row"><button class="btn sm" onclick="editarMemb('${m.ID}')">Ver</button><button class="btn pri sm" onclick="activar('${m.ID}')">Cuenta creada → Activar</button></div></div>`).join('') : '<div class="empty small">No hay solicitudes nuevas.</div>';
+  $('#aSolN').textContent = sol.length;
+  $('#aLink').value = d.urlInscripcion;
+  $('#aWa').href = 'https://wa.me/?text=' + encodeURIComponent('Si quieres Claude de pago (RD$ 600 al mes), inscríbete aquí: ' + d.urlInscripcion);
+  $('#aContrato').value = d.contrato.join('\n');
+  $('#aHoja').href = d.hojaUrl; $('#aCarpeta').href = d.carpetaUrl;
+  $('#aCorreo').textContent = 'Sesión: ' + d.correo;
+  pintarTabla();
+}
+function pintarTabla(){
+  const d = ADM, q = $('#aBuscar').value.trim().toLowerCase(), f = $('#aFiltro').value;
+  let ms = d.membresias.filter(m => m.Estado !== 'Solicitud' && m.Nombre.toLowerCase().includes(q));
+  if (f === 'deuda') ms = ms.filter(m => m.deuda > 0);
+  else if (f === 'revision') ms = ms.filter(m => Object.values(m.meses).some(x => x.e === 'revision'));
+  else if (f) ms = ms.filter(m => m.Estado === f);
+  ms.sort((a, b) => a.Nombre.localeCompare(b.Nombre, 'es'));
+  const cnt = {}; d.membresias.forEach(m => cnt[m.Nombre] = (cnt[m.Nombre]||0) + 1);
+  const ico = {pagado:'✓', revision:'?', vencido:'!', pendiente:'•', futuro:'', na:''};
+  $('#aTabla').innerHTML = `<thead><tr><th class="nm">Membresía</th><th>Debe</th>${d.meses.map(m => `<th class="${m===d.mesProximo?'now':''}" style="text-align:center">${nMesC(m)}</th>`).join('')}</tr></thead><tbody>` +
+    (ms.length ? ms.map(m => `<tr><td class="nm"><a onclick="editarMemb('${m.ID}')" title="${esc(m.Nombre)}">${esc(m.Nombre)}</a>${cnt[m.Nombre]>1?` <span class="muted small">${esc(m.ID)}</span>`:''}${m.Estado!=='Activa'?` <span class="st na">${esc(m.Estado)}</span>`:''}</td>
+      <td>${m.deuda ? `<span class="st vencido">${rd(m.deuda)}</span>` : '<span class="muted small">—</span>'}</td>
+      ${d.meses.map(mes => { const c = m.meses[mes]; return `<td class="c"><button class="cell ${c.e}" title="${nMes(mes)}: ${ETQ[c.e]}${c.pago?' · '+esc(c.pago.Metodo):''}" ${c.e==='na'?'disabled':`onclick="abrirPago('${m.ID}','${mes}')"`}>${ico[c.e]}</button></td>`; }).join('')}</tr>`).join('')
+    : `<tr><td colspan="${d.meses.length+2}" class="empty">Nada que mostrar.</td></tr>`) + '</tbody>';
+}
+$('#aBuscar') && ($('#aBuscar').oninput = pintarTabla);
+$('#aFiltro') && ($('#aFiltro').onchange = pintarTabla);
+const memb = id => ADM.membresias.find(m => m.ID === id);
+
+let pSel = new Set(), pMemb = null;
+function abrirPago(id, mes){
+  const m = memb(id), c = m.meses[mes];
+  pMemb = m; pSel = new Set([mes]);
+  $('#pTit').textContent = c.pago ? 'Pago de ' + nMes(mes) : 'Registrar pago';
+  $('#pSub').textContent = m.Nombre + ' · ' + rd(ADM.monto) + ' por mes';
+  const p = c.pago;
+  $('#pExiste').innerHTML = p ? `<div class="box"><div class="row" style="justify-content:space-between"><span class="st ${c.e}">${ETQ[c.e]}</span><span class="muted small">${esc(p.RegistradoPor)} · ${esc(p.Fecha)}</span></div>
+    <div style="margin-top:8px">Método: <b>${esc(p.Metodo)}</b>${p.Notas?' · '+esc(p.Notas):''}</div>
+    ${p.Comprobante ? `<div><a href="${esc(p.Comprobante)}" target="_blank">Ver comprobante ↗</a></div>` : ''}
+    <div class="row" style="margin-top:10px">${p.Estado!=='Confirmado'?`<button class="btn pri sm" onclick="accionPago('confirmarPago','${p.ID}')">✓ Confirmar</button>`:''}<button class="btn danger sm" onclick="accionPago('borrarPago','${p.ID}',this)">Borrar pago</button></div>
+    <div class="hint">O corrige los datos abajo y guarda.</div></div>` : '';
+  $('#pMeses').innerHTML = ADM.meses.filter(x => x >= (m.InicioCobro || x) && (m.meses[x].e !== 'pagado' || x === mes)).map(x => `<span class="pill ${pSel.has(x)?'on':''}" data-m="${x}">${nMesC(x)}</span>`).join('');
+  radios($('#pMetodo'), 'pMet', ADM.metodos, p && ADM.metodos.includes(p.Metodo) ? p.Metodo : '');
+  $('#pFecha').value = (p && p.Fecha) || ADM.hoy; $('#pFile').value = ''; $('#pNotas').value = (p && p.Notas) || '';
+  dPago.showModal();
+}
+$('#pMeses').onclick = e => { const p = e.target.closest('.pill'); if(!p) return; const m = p.dataset.m; pSel.has(m) ? pSel.delete(m) : pSel.add(m); p.classList.toggle('on'); };
+$('#pGuardar').onclick = async () => {
+  const b = $('#pGuardar');
+  if (!pSel.size) return toast('Elige al menos un mes.', true);
+  if (!radioVal('pMet')) return toast('Elige el método de pago.', true);
+  cargando(b, true);
+  try {
+    const archivo = await leerArchivo($('#pFile').files[0]);
+    pintarAdmin(await api('registrarPago', {membresiaId: pMemb.ID, meses: [...pSel], metodo: radioVal('pMet'), fecha: $('#pFecha').value, archivo, notas: $('#pNotas').value}));
+    dPago.close(); toast('Pago guardado.');
+  } catch(e){ toast(msg(e), true); }
+  cargando(b, false);
+};
+// confirm() está bloqueado en el iframe de Apps Script: se confirma con un segundo toque
+function segundoToque(b){ if (b.dataset.ok) return true; b.dataset.ok = 1; const t = b.textContent; b.textContent = '¿Seguro? Toca otra vez'; setTimeout(() => { delete b.dataset.ok; b.textContent = t; }, 4000); return false; }
+async function accionPago(fn, id, b){
+  if (fn === 'borrarPago' && !segundoToque(b)) return;
+  try { pintarAdmin(await api(fn, id)); dPago.close(); toast(fn === 'borrarPago' ? 'Pago borrado.' : 'Pago confirmado.'); }
+  catch(e){ toast(msg(e), true); }
+}
+
+let mId = '';
+function editarMemb(id){
+  const m = id ? memb(id) : {Estado:'Activa', Rol:'Docente', InicioCobro: ADM.mesProximo};
+  mId = id || '';
+  const f = $('#fMemb');
+  f.Estado.innerHTML = ADM.estados.map(s => `<option>${s}</option>`).join('');
+  ['Nombre','Rol','Estado','Telefono','Correo','CuentaClaude','InicioCobro','ContratoFirmado','Notas'].forEach(k => f[k].value = m[k] || '');
+  $('#mTit').textContent = id ? m.Nombre : 'Nueva membresía';
+  $('#mSub').textContent = id ? 'ID ' + m.ID + ' · inscrito ' + (m.FechaInscripcion || '—') : 'Para alguien que no llenó el formulario o una membresía adicional.';
+  $('#mBorrar').style.display = id ? '' : 'none';
+  $('#mContrato').style.display = id ? '' : 'none';
+  dMemb.showModal();
+}
+function activar(id){
+  editarMemb(id);
+  const f = $('#fMemb'); f.Estado.value = 'Activa'; if (!f.InicioCobro.value) f.InicioCobro.value = ADM.mesProximo;
+  f.CuentaClaude.value = f.CuentaClaude.value || memb(id).Correo; f.CuentaClaude.focus();
+  $('#mSub').textContent = 'Revisa la cuenta de Claude y el mes de inicio, guarda e imprime el contrato.';
+}
+$('#fMemb').onsubmit = async e => {
+  e.preventDefault();
+  const b = $('#fMemb button[type=submit]'), f = e.target, o = {ID: mId};
+  ['Nombre','Rol','Estado','Telefono','Correo','CuentaClaude','InicioCobro','ContratoFirmado','Notas'].forEach(k => o[k] = f[k].value);
+  cargando(b, true);
+  try { pintarAdmin(await api('guardarMembresia', o)); dMemb.close(); toast('Membresía guardada.'); }
+  catch(err){ toast(msg(err), true); }
+  cargando(b, false);
+};
+$('#mBorrar').onclick = async () => {
+  if (!segundoToque($('#mBorrar'))) return;
+  try { pintarAdmin(await api('borrarMembresia', mId)); dMemb.close(); toast('Membresía borrada.'); } catch(e){ toast(msg(e), true); }
+};
+$('#mContrato').onclick = () => { dMemb.close(); verContrato(mId); };
+
+async function guardarContrato(){
+  try { pintarAdmin(await api('guardarContrato', $('#aContrato').value.split('\n'))); toast('Cláusulas guardadas.'); } catch(e){ toast(msg(e), true); }
+}
+
+function verContrato(id){
+  const m = memb(id), d = ADM;
+  const fecha = new Date(d.hoy + 'T12:00').toLocaleDateString('es-DO', {day:'numeric', month:'long', year:'numeric'});
+  const filas = [['Titular de la membresía', m.Nombre], ['Rol / área', m.Rol], ['WhatsApp', m.Telefono], ['Correo', m.Correo],
+    ['Cuenta de Claude', m.CuentaClaude || '________________________'], ['Código de membresía', m.ID],
+    ['Cuota mensual', rd(d.monto) + ' por membresía'], ['Vencimiento', 'Día ' + d.dia + ' de cada mes'],
+    ['Inicio del cobro', m.InicioCobro ? nMes(m.InicioCobro) : '—'], ['Formas de pago', d.metodos.join(' · ')]];
+  $('#docC').innerHTML = (d.contrato.length ? '' : '<div class="aviso noprint">Faltan las cláusulas del contrato. Escríbelas en Administración → Contrato antes de imprimir.</div>') +
+    `<h1>Contrato de Suscripción Mensual — Claude de pago</h1><p class="c">Politécnico Cristiano James Davis · La Vega, República Dominicana</p>
+    <p>En La Vega, a ${esc(fecha)}, entre el <b>Prof. Jeiffry García</b>, Coordinador TIC, quien administra la suscripción, y <b>${esc(m.Nombre)}</b>, titular de la membresía, se acuerda lo siguiente:</p>
+    <table>${filas.map(([a, b]) => `<tr><td>${esc(a)}</td><td>${esc(b)}</td></tr>`).join('')}</table>
+    ${d.contrato.length ? `<h3 style="font-family:Georgia,serif">Cláusulas</h3><ol>${d.contrato.map(c => `<li>${esc(c)}</li>`).join('')}</ol>` : ''}
+    <div class="firmas"><div>${esc(m.Nombre)}<br>Titular de la membresía</div><div>Prof. Jeiffry García<br>Administrador</div></div>`;
+  document.querySelector('.wrap').style.display = 'none';
+  $('#contrato').style.display = 'block'; window.scrollTo(0, 0);
+}
+function cerrarContrato(){ $('#contrato').style.display = 'none'; document.querySelector('.wrap').style.display = ''; }
+
+function copiarLink(){
+  const i = $('#aLink'); i.select();
+  (navigator.clipboard ? navigator.clipboard.writeText(i.value) : Promise.reject())
+    .catch(() => document.execCommand('copy')).then(() => toast('Enlace copiado.'), () => toast('Selecciona el enlace y cópialo.', true));
+}
+
+// Apps Script envuelve este script en una función: los onclick="" del HTML solo ven lo que esté en window
+Object.assign(window, {ir, editarMemb, activar, abrirPago, accionPago, guardarContrato, copiarLink, verContrato, cerrarContrato, dPago, dMemb});
+
+iniciar();
+const VISTA = '' || new URLSearchParams(location.search).get('v') || '';
+if (['inscripcion','comprobante','estado'].includes(VISTA)) ir(VISTA);
+else if (ES_ADMIN) ir('admin');
+</script>
+</body>
+</html>
