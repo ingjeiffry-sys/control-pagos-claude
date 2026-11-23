@@ -6,36 +6,34 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F7F4EE; --card:#FFFFFF; --ink:#1F1D1A; --muted:#6F6A61; --line:#E7E1D6; --soft:#F1ECE3;
-  --acc:#C9643F; --acc-2:#E08A5F; --acc-ink:#FFFFFF; --acc-soft:#FBE9DF;
-  --ok:#2F7D55; --ok-soft:#E1F1E7; --warn:#B7791F; --warn-soft:#FBF0D9; --bad:#B83A2A; --bad-soft:#FBE3DF;
-  --info:#3A64B8; --info-soft:#E3EBFA; --shadow:0 1px 2px rgba(40,30,20,.05),0 8px 24px rgba(40,30,20,.06);
-  --r:16px;
+  /* Institucional TEARS: verde y marrón del logo, fondo blanco (decisión del docente, 23/11/2026) */
+  --bg:#F4F7F3; --card:#FFFFFF; --ink:#18261B; --muted:#5C6A5F; --line:#DCE5D9; --soft:#ECF2EA;
+  --acc:#3D7A2C; --acc-2:#5B9B43; --acc-ink:#FFFFFF; --acc-soft:#E4F0DE; --cafe:#8A4B2A; --cafe-soft:#F5EAE3;
+  --ok:#2F7D4F; --ok-soft:#E0F1E6; --warn:#A86A12; --warn-soft:#FBF0D9; --bad:#B4372A; --bad-soft:#FBE3DF;
+  --info:#2E5FA8; --info-soft:#E3EBFA; --shadow:0 1px 2px rgba(20,40,20,.05),0 6px 20px rgba(20,40,20,.06);
+  --r:14px;
 }
-@media (prefers-color-scheme:dark){:root{
-  --bg:#171513; --card:#211E1B; --ink:#F2EDE6; --muted:#A79F94; --line:#38332D; --soft:#2A2622;
-  --acc:#E0805A; --acc-2:#F09A72; --acc-ink:#1A1410; --acc-soft:#3A271E;
-  --ok:#5CC08A; --ok-soft:#1E3328; --warn:#E5AE52; --warn-soft:#3A2F1A; --bad:#EE7A68; --bad-soft:#3D2420;
-  --info:#7FA2EE; --info-soft:#1F2A40; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
-}}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Plus Jakarta Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Nunito Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font:inherit;color:inherit}
 a{color:var(--acc)}
 .wrap{max-width:1180px;margin:0 auto;padding:0 16px}
 header{padding:28px 0 8px}
 .brand{display:flex;align-items:center;gap:14px}
-.mark{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--acc),var(--acc-2));display:grid;place-items:center;box-shadow:var(--shadow);flex:none}
-.mark svg{width:26px;height:26px;fill:#fff}
-h1{font-family:Fraunces,serif;font-weight:650;font-size:clamp(24px,4vw,34px);letter-spacing:-.02em;margin:0;line-height:1.1}
+.mark{height:54px;padding:6px 10px;border-radius:12px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;flex:none}
+.mark img{height:40px;display:block}
+header{border-bottom:3px solid var(--acc);margin-bottom:4px}
+.brand h1{color:var(--acc)}
+.brand .sub b{color:var(--cafe)}
+h1{font-family:Montserrat,sans-serif;font-weight:700;font-size:clamp(24px,4vw,34px);letter-spacing:-.02em;margin:0;line-height:1.1}
 .sub{color:var(--muted);font-size:14px;margin-top:2px}
-.chip-admin{margin-left:auto;background:var(--ink);color:var(--bg);font-size:12px;font-weight:600;padding:6px 12px;border-radius:999px;white-space:nowrap}
+.chip-admin{margin-left:auto;background:var(--cafe);color:#fff;font-size:12px;font-weight:600;padding:6px 12px;border-radius:999px;white-space:nowrap}
 nav{display:flex;gap:6px;margin:20px 0 22px;overflow-x:auto;padding:4px;background:var(--soft);border-radius:14px;scrollbar-width:none}
 nav button{border:0;background:transparent;padding:9px 16px;border-radius:10px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
-nav button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+nav button.on{background:var(--acc);color:#fff;box-shadow:var(--shadow)}
 section{display:none;animation:fade .25s ease}
 section.on{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -44,17 +42,17 @@ section.on{display:block}
 .g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 .g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
 .g5{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
-h2{font-family:Fraunces,serif;font-weight:600;font-size:22px;margin:0 0 4px;letter-spacing:-.01em}
+h2{font-family:Montserrat,sans-serif;font-weight:600;font-size:22px;margin:0 0 4px;letter-spacing:-.01em}
 h3{font-size:15px;margin:0 0 6px}
 .muted{color:var(--muted)}
 .small{font-size:13px}
 .hero{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
 @media(max-width:760px){.hero{grid-template-columns:1fr}}
-.price{font-family:Fraunces,serif;font-size:56px;font-weight:650;letter-spacing:-.03em;line-height:1}
-.price small{font-family:"Plus Jakarta Sans";font-size:16px;font-weight:500;color:var(--muted);letter-spacing:0}
+.price{font-family:Montserrat,sans-serif;color:var(--cafe);font-size:52px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.price small{font-family:"Nunito Sans";font-size:16px;font-weight:500;color:var(--muted);letter-spacing:0}
 .hero .card:first-child{background:linear-gradient(160deg,var(--acc-soft),var(--card) 70%)}
 .due{display:flex;align-items:center;gap:14px;margin-top:18px;padding:14px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
-.due b{font-size:26px;font-family:Fraunces,serif}
+.due b{font-size:26px;font-family:Montserrat,sans-serif}
 .method{display:flex;gap:12px;align-items:flex-start}
 .method .ic{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:none;font-size:18px;background:var(--acc-soft)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--card);padding:10px 16px;border-radius:11px;font-weight:600;cursor:pointer;text-decoration:none;color:var(--ink)}
@@ -97,7 +95,7 @@ textarea{min-height:90px;resize:vertical}
 .tl{border:1px solid var(--line);border-radius:12px;padding:12px}
 .tl b{display:block;text-transform:capitalize;margin-bottom:6px;font-size:14px}
 .kpi{padding:18px}
-.kpi .n{font-family:Fraunces,serif;font-size:30px;font-weight:650;line-height:1.1;margin-top:4px}
+.kpi .n{font-family:Montserrat,sans-serif;font-size:30px;font-weight:700;line-height:1.1;margin-top:4px}
 .kpi .l{font-size:12.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
 .tablewrap{overflow:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--card);box-shadow:var(--shadow);max-height:70vh}
 table{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5px}
@@ -166,10 +164,10 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:34px 0 40px
 <div class="wrap">
   <header>
     <div class="brand">
-      <div class="mark"><svg viewBox="0 0 24 24"><path d="M12 2l1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z" opacity=".8"/></svg></div>
+      <div class="mark"><img src="https://ingjeiffry-sys.github.io/control-pagos-claude/tears.png" alt="Fundación TEARS"></div>
       <div>
         <h1>Control de Pagos Claude</h1>
-        <div class="sub">Membresías de Claude de pago · Politécnico Cristiano James Davis</div>
+        <div class="sub"><b>Fundación TEARS</b> · Politécnico Cristiano James Davis</div>
       </div>
       
     </div>
@@ -471,6 +469,9 @@ function pintarAdmin(d){
   $('#aWa').href = 'https://wa.me/?text=' + encodeURIComponent('Si quieres Claude de pago (RD$ 600 al mes), inscríbete aquí: ' + d.urlInscripcion);
   $('#aHoja').href = d.hojaUrl; $('#aCarpeta').href = d.carpetaUrl;
   $('#aCorreo').textContent = 'Sesión: ' + d.correo;
+  $('#aAdmins').innerHTML = [`<div class="sol"><div><b>${esc(d.dueno)}</b> <span class="muted small">· dueño</span></div></div>`]
+    .concat(d.adminsExtra.map(c => `<div class="sol"><div><b>${esc(c)}</b></div>${d.esDueno ? `<button class="btn danger sm" onclick="quitarAdmin('${esc(c)}', this)">Quitar</button>` : ''}</div>`)).join('');
+  $('#aAdminAdd').style.display = d.esDueno ? '' : 'none';
   pintarTabla();
 }
 function pintarTabla(){
@@ -571,6 +572,17 @@ function verContrato(id){
 }
 function cerrarContrato(){ $('#contrato').style.display = 'none'; document.querySelector('.wrap').style.display = ''; }
 
+async function agregarAdmin(){
+  const c = $('#aAdminCorreo').value.trim().toLowerCase();
+  if (!c) return toast('Escribe el correo @tears.org.', true);
+  try { pintarAdmin(await api('guardarAdmins', ADM.adminsExtra.concat([c]))); $('#aAdminCorreo').value = ''; toast('Administrador agregado.'); }
+  catch(e){ toast(msg(e), true); }
+}
+async function quitarAdmin(c, b){
+  if (!segundoToque(b)) return;
+  try { pintarAdmin(await api('guardarAdmins', ADM.adminsExtra.filter(x => x !== c))); toast('Administrador quitado.'); }
+  catch(e){ toast(msg(e), true); }
+}
 function copiarLink(){
   const i = $('#aLink'); i.select();
   (navigator.clipboard ? navigator.clipboard.writeText(i.value) : Promise.reject())
@@ -578,7 +590,7 @@ function copiarLink(){
 }
 
 // Apps Script envuelve este script en una función: los onclick="" del HTML solo ven lo que esté en window
-Object.assign(window, {ir, editarMemb, activar, abrirPago, accionPago, copiarLink, verContrato, cerrarContrato, dPago, dMemb});
+Object.assign(window, {ir, agregarAdmin, quitarAdmin, editarMemb, activar, abrirPago, accionPago, copiarLink, verContrato, cerrarContrato, dPago, dMemb});
 
 iniciar();
 const VISTA = document.body.dataset.vista || new URLSearchParams(location.search).get('v') || '';
