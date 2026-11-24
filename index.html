@@ -91,6 +91,19 @@ textarea{min-height:90px;resize:vertical}
 .st.vencido{color:var(--bad);background:var(--bad-soft)}
 .st.pendiente{color:var(--warn);background:var(--warn-soft)}
 .st.futuro,.st.na{color:var(--muted);background:var(--soft)}
+.st.fundacion,.cell.fundacion{color:var(--cafe);background:var(--cafe-soft)}
+.st.nomina,.cell.nomina{color:#5B3F9A;background:#EEE9F7}
+/* Flujo del dinero */
+.flujo{display:flex;align-items:center;gap:10px;margin-top:14px}
+.fcol{display:grid;gap:8px;flex:1;min-width:0}
+.nodo{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--card)}
+.nodo b{display:block;font-size:14px}
+.nodo .muted{font-size:12.5px}
+.nodo.ana{border-color:var(--acc);background:var(--acc-soft)}
+.nodo.isa{border-color:var(--cafe);background:var(--cafe-soft)}
+.flecha{font-size:22px;color:var(--muted);flex:none}
+.adm-j{margin-top:12px;padding:10px 12px;border:1px dashed var(--acc);border-radius:12px;font-size:13.5px}
+@media(max-width:760px){.flujo{flex-direction:column;align-items:stretch}.flecha{transform:rotate(90deg);align-self:center}}
 .timeline{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:14px}
 .tl{border:1px solid var(--line);border-radius:12px;padding:12px}
 .tl b{display:block;text-transform:capitalize;margin-bottom:6px;font-size:14px}
@@ -186,7 +199,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:34px 0 40px
     <div class="hero">
       <div class="card">
         <div class="muted small" style="font-weight:600;text-transform:uppercase;letter-spacing:.06em">Cuota mensual por membresía</div>
-        <div class="price" style="margin-top:8px">RD$ 600 <small>/ mes</small></div>
+        <div class="price" style="margin-top:8px">RD$ <span class="montoTxt">600</span> <small>/ mes</small></div>
         <p class="muted" style="max-width:46ch">Claude de pago para los compañeros del centro. Cada membresía es una cuenta; una persona puede tener más de una.</p>
         <div class="due">
           <div style="font-size:26px">📅</div>
@@ -225,7 +238,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:34px 0 40px
         </div>
         <div class="field"><label>¿Cómo vas a pagar?</label><div class="radio" id="iMetodo"></div></div>
         <div class="field"><label for="iNotas">Comentario (opcional)</label><textarea id="iNotas" maxlength="300" style="min-height:64px"></textarea></div>
-        <div class="field"><label class="check"><input type="checkbox" id="iAcepto"> <span>Acepto pagar <b>RD$ 600 al mes por cada membresía</b>, a más tardar el <b>día 25</b> de cada mes, y firmar el contrato cuando se cree la cuenta.</span></label></div>
+        <div class="field"><label class="check"><input type="checkbox" id="iAcepto"> <span>Acepto pagar <b>RD$ <span class="montoTxt">600</span> al mes por cada membresía</b>, a más tardar el <b>día 25</b> de cada mes, y firmar el contrato cuando se cree la cuenta.</span></label></div>
         <button class="btn pri" type="submit" style="width:100%">Enviar inscripción</button>
       </form>
       <div class="card">
@@ -234,7 +247,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:34px 0 40px
           <li>Te inscribes aquí.</li>
           <li>El docente crea tu cuenta de Claude de pago.</li>
           <li>Firmas el contrato impreso.</li>
-          <li>Pagas RD$ 600 cada mes antes del día 25 y subes tu comprobante.</li>
+          <li>Pagas RD$ <span class="montoTxt">600</span> cada mes antes del día 25 y subes tu comprobante.</li>
         </ol>
       </div>
     </div>
@@ -286,6 +299,19 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:34px 0 40px
   <div class="row" style="justify-content:flex-end"><button class="btn" onclick="dPago.close()">Cancelar</button><button class="btn pri" id="pGuardar">Guardar pago</button></div>
 </div></div>
 
+<!-- Diálogo de pago a Isaac -->
+<div class="modal" id="dIsaac"><div class="dlg">
+  <div class="dlg-h"><div><h2>Pago a Isaac</h2><div class="muted small">Transferencia de Ana María a Isaac por las cuentas de Claude.</div></div><button class="x" onclick="dIsaac.close()">×</button></div>
+  <div class="grid g2" style="gap:12px">
+    <div class="field"><label for="iMes">Mes</label><select id="iMes"></select></div>
+    <div class="field"><label for="iMonto">Monto (RD$)</label><input type="number" id="iMonto" min="1" step="0.01"><div class="hint">El que pidió Isaac.</div></div>
+    <div class="field"><label for="iFecha">Fecha</label><input type="date" id="iFecha"></div>
+    <div class="field"><label for="iFile">Comprobante (opcional)</label><input type="file" id="iFile" accept="image/*,application/pdf" style="padding:8px"></div>
+  </div>
+  <div class="field"><label for="iNota">Nota</label><input type="text" id="iNota" maxlength="200"></div>
+  <div class="row" style="justify-content:flex-end"><button class="btn" onclick="dIsaac.close()">Cancelar</button><button class="btn pri" id="iGuardar">Guardar</button></div>
+</div></div>
+
 <!-- Diálogo de membresía -->
 <div class="modal" id="dMemb"><div class="dlg">
   <div class="dlg-h"><div><h2 id="mTit">Membresía</h2><div class="muted small" id="mSub"></div></div><button class="x" onclick="dMemb.close()">×</button></div>
@@ -294,6 +320,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:34px 0 40px
     <div class="grid g2" style="gap:12px">
       <div class="field"><label>Rol / área</label><input type="text" name="Rol" maxlength="60"></div>
       <div class="field"><label>Trato en el contrato</label><select name="Trato"><option>señor</option><option>señora</option></select></div>
+      <div class="field"><label>Quién paga</label><select name="Paga"></select><div class="hint" id="mPagaHint"></div></div>
       <div class="field"><label>Estado</label><select name="Estado"></select></div>
       <div class="field"><label>WhatsApp</label><input type="tel" name="Telefono"></div>
       <div class="field"><label>Correo</label><input type="email" name="Correo"></div>
@@ -322,19 +349,19 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:34px 0 40px
 // Valores de la plantilla por atributos HTML: dentro de <script> Apps Script los imprime con comillas propias ('' → '''')
 const ES_ADMIN = document.body.dataset.admin === 'true';
 const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-const ETQ = {pagado:'Pagado',revision:'Por revisar',vencido:'Vencido',pendiente:'Pendiente',futuro:'Próximo',na:'—'};
+const ETQ = {pagado:'Pagado',revision:'Por revisar',fundacion:'Fundación',nomina:'Nómina',vencido:'Vencido',pendiente:'Pendiente',futuro:'Próximo',na:'—'};
 let PUB = null, ADM = null;
 
 const $ = s => document.querySelector(s);
 window.addEventListener('error', e => toast('Error: ' + e.message, true));
 // capas en vez de <dialog>: showModal no se ve dentro del iframe de Apps Script
-const dPago = $('#dPago'), dMemb = $('#dMemb');
-[dPago, dMemb].forEach(d => {
+const dPago = $('#dPago'), dMemb = $('#dMemb'), dIsaac = $('#dIsaac');
+[dPago, dMemb, dIsaac].forEach(d => {
   d.showModal = () => d.classList.add('on');
   d.close = () => d.classList.remove('on');
   d.addEventListener('click', e => { if (e.target === d) d.close(); });
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { dPago.close(); dMemb.close(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { dPago.close(); dMemb.close(); dIsaac.close(); } });
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nMes = m => MESES[+m.slice(5,7)-1] + ' ' + m.slice(0,4);
 const nMesC = m => MESES[+m.slice(5,7)-1].slice(0,3) + ' ' + m.slice(2,4);
@@ -379,6 +406,7 @@ async function iniciar(){
     PUB = await api('datosPublicos');
     const pv = PUB.mesProximo;
     $('#proxVence').textContent = PUB.dia + ' de ' + MESES[+pv.slice(5,7)-1];
+    document.querySelectorAll('.montoTxt').forEach(e => e.textContent = Number(PUB.monto).toLocaleString('es-DO'));
     radios($('#iMetodo'), 'iMet', PUB.metodos, PUB.metodos[0]);
     const ops = '<option value="">— Elige —</option>' + PUB.membresias.map(m => `<option value="${m.id}">${esc(m.nombre)}</option>`).join('');
     $('#cMemb').innerHTML = ops; $('#eMemb').innerHTML = ops;
@@ -449,15 +477,18 @@ function pintarAdmin(d){
   $('#aCarga').style.display = 'none'; $('#aBody').style.display = '';
   const act = d.membresias.filter(m => m.Estado === 'Activa');
   const pv = d.mesProximo;
-  const pagPv = act.filter(m => m.meses[pv] && m.meses[pv].e === 'pagado').length;
+  const tipo = t => act.filter(m => (m.Paga || 'Compañero') === t);
+  const comp = tipo('Compañero'), nom = tipo('Nómina'), fun = tipo('Fundación');
+  const rp = resumenMes(pv);
+  const pagPv = comp.filter(m => m.meses[pv] && m.meses[pv].e === 'pagado').length;
   const deuda = d.membresias.reduce((s, m) => s + m.deuda, 0);
   const conDeuda = d.membresias.filter(m => m.deuda > 0).length;
   const rev = d.membresias.reduce((s, m) => s + Object.values(m.meses).filter(x => x.e === 'revision').length, 0);
   const sol = d.membresias.filter(m => m.Estado === 'Solicitud');
   const personas = new Set(act.map(m => m.Nombre.toLowerCase())).size;
   $('#aKpi').innerHTML = [
-    ['Membresías activas', act.length, personas + ' persona' + (personas===1?'':'s')],
-    ['Pagado ' + nMes(pv), pagPv + ' / ' + act.length, rd(pagPv * d.monto) + ' de ' + rd(act.length * d.monto)],
+    ['Membresías activas', act.length, `${comp.length} compañeros · ${nom.length} nómina · ${fun.length} Fundación`],
+    ['Cobrado ' + nMes(pv), pagPv + ' / ' + comp.length, rd(rp.cobrado) + ' de ' + rd(comp.length * d.monto) + ' (compañeros)'],
     ['Vencido', rd(deuda), conDeuda + ' membresía' + (conDeuda===1?'':'s') + ' con deuda'],
     ['Por revisar', rev, 'comprobantes subidos'],
     ['Solicitudes', sol.length, 'esperando cuenta']
@@ -465,8 +496,24 @@ function pintarAdmin(d){
   $('#aSol').innerHTML = sol.length ? sol.map(m => `<div class="sol"><div><b>${esc(m.Nombre)}</b> <span class="muted small">· ${esc(m.Rol)} · ${esc(m.Telefono)} · ${esc(m.Correo)}</span><div class="muted small">${esc(m.FechaInscripcion)} ${m.Notas ? '· ' + esc(m.Notas) : ''}</div></div>
     <div class="row"><button class="btn sm" onclick="editarMemb('${m.ID}')">Ver</button><button class="btn pri sm" onclick="activar('${m.ID}')">Cuenta creada → Activar</button></div></div>`).join('') : '<div class="empty small">No hay solicitudes nuevas.</div>';
   $('#aSolN').textContent = sol.length;
+  $('#aFlujoMes').textContent = nMes(pv);
+  const nodo = (cls, t, s) => `<div class="nodo ${cls}"><b>${t}</b><div class="muted">${s}</div></div>`;
+  $('#aFlujo').innerHTML = `<div class="flujo">
+    <div class="fcol">${nodo('', 'Compañeros (' + comp.length + ')', 'Transferencia o efectivo · ' + rd(rp.cobrado) + ' cobrado')}
+      ${nodo('', 'Nómina (' + nom.length + ')', 'Descuento en la Fundación · ' + rd(rp.nomina * d.monto))}
+      ${nodo('', 'Fundación (' + fun.length + ')', 'Cubiertos por la Fundación · ' + rd(rp.fundacion * d.monto))}</div>
+    <div class="flecha">→</div>
+    <div class="fcol">${nodo('ana', 'Ana María · Fundación TEARS', 'Cobra y verifica los pagos')}</div>
+    <div class="flecha">→</div>
+    <div class="fcol">${nodo('isa', 'Isaac', rp.isaac ? 'Recibió ' + rd(rp.isaac) : 'Pago del mes sin registrar')}</div>
+    <div class="flecha">→</div>
+    <div class="fcol">${nodo('', 'Claude', act.length + ' cuentas creadas y pagadas por Isaac')}</div>
+  </div>
+  <div class="adm-j"><b>Jeiffry García</b> · intermediario: administra esta página y vela por que todos paguen.</div>`;
+  pintarIsaac();
+  $('#aMonto').value = d.monto;
   $('#aLink').value = d.urlInscripcion;
-  $('#aWa').href = 'https://wa.me/?text=' + encodeURIComponent('Si quieres Claude de pago (RD$ 600 al mes), inscríbete aquí: ' + d.urlInscripcion);
+  $('#aWa').href = 'https://wa.me/?text=' + encodeURIComponent('Si quieres Claude de pago (' + rd(d.monto) + ' al mes), inscríbete aquí: ' + d.urlInscripcion);
   $('#aHoja').href = d.hojaUrl; $('#aCarpeta').href = d.carpetaUrl;
   $('#aCorreo').textContent = 'Sesión: ' + d.correo;
   $('#aAdmins').innerHTML = [`<div class="sol"><div><b>${esc(d.dueno)}</b> <span class="muted small">· dueño</span></div></div>`]
@@ -482,7 +529,7 @@ function pintarTabla(){
   else if (f) ms = ms.filter(m => m.Estado === f);
   ms.sort((a, b) => a.Nombre.localeCompare(b.Nombre, 'es'));
   const cnt = {}; d.membresias.forEach(m => cnt[m.Nombre] = (cnt[m.Nombre]||0) + 1);
-  const ico = {pagado:'✓', revision:'?', vencido:'!', pendiente:'•', futuro:'', na:''};
+  const ico = {pagado:'✓', revision:'?', fundacion:'F', nomina:'N', vencido:'!', pendiente:'•', futuro:'', na:''};
   $('#aTabla').innerHTML = `<thead><tr><th class="nm">Membresía</th><th>Debe</th>${d.meses.map(m => `<th class="${m===d.mesProximo?'now':''}" style="text-align:center">${nMesC(m)}</th>`).join('')}</tr></thead><tbody>` +
     (ms.length ? ms.map(m => `<tr><td class="nm"><a onclick="editarMemb('${m.ID}')" title="${esc(m.Nombre)}">${esc(m.Nombre)}</a>${cnt[m.Nombre]>1?` <span class="muted small">${esc(m.ID)}</span>`:''}${m.Estado!=='Activa'?` <span class="st na">${esc(m.Estado)}</span>`:''}</td>
       <td>${m.deuda ? `<span class="st vencido">${rd(m.deuda)}</span>` : '<span class="muted small">—</span>'}</td>
@@ -492,6 +539,64 @@ function pintarTabla(){
 $('#aBuscar') && ($('#aBuscar').oninput = pintarTabla);
 $('#aFiltro') && ($('#aFiltro').onchange = pintarTabla);
 const memb = id => ADM.membresias.find(m => m.ID === id);
+
+// Resumen de un mes: lo cobrado a compañeros, cuentas de nómina y Fundación, y lo pagado a Isaac
+function resumenMes(mes){
+  const r = {cuentas: 0, cobrado: 0, nomina: 0, fundacion: 0, isaac: 0};
+  ADM.membresias.forEach(m => {
+    const c = m.meses[mes]; if (!c || c.e === 'na') return;
+    if (m.Estado === 'Activa') r.cuentas++;
+    if (c.e === 'pagado') r.cobrado += Number(c.pago.Monto) || ADM.monto;
+    else if (c.e === 'nomina') r.nomina++;
+    else if (c.e === 'fundacion') r.fundacion++;
+  });
+  (ADM.pagosIsaac || []).forEach(p => { if (p.Mes === mes) r.isaac += Number(p.Monto) || 0; });
+  return r;
+}
+function pintarIsaac(){
+  const d = ADM, meses = d.meses.filter(m => m <= d.mesProximo).reverse();
+  $('#aIsaac').innerHTML = `<thead><tr><th>Mes</th><th>Cuentas</th><th>Cobrado a compañeros</th><th>Nómina</th><th>Fundación</th><th>Pagado a Isaac</th></tr></thead><tbody>` +
+    meses.map(mes => {
+      const r = resumenMes(mes), ps = (d.pagosIsaac || []).filter(p => p.Mes === mes);
+      return `<tr><td style="text-transform:capitalize"><b>${nMes(mes)}</b></td><td>${r.cuentas}</td><td>${rd(r.cobrado)}</td>
+        <td>${r.nomina} · ${rd(r.nomina * d.monto)}</td><td>${r.fundacion} · ${rd(r.fundacion * d.monto)}</td>
+        <td>${ps.map(p => `<div class="row" style="gap:6px"><span class="st pagado">${rd(p.Monto)}</span><span class="muted small">${esc(p.Fecha)}</span>${p.Comprobante ? `<a class="small" href="${esc(p.Comprobante)}" target="_blank">ver</a>` : ''}<button class="btn danger sm" onclick="borrarIsaac('${p.ID}', this)">Borrar</button></div>`).join('')}
+          <button class="btn sm" onclick="abrirIsaac('${mes}')">+ Pago</button></td></tr>`;
+    }).join('') + '</tbody>';
+}
+function abrirIsaac(mes){
+  const d = ADM;
+  $('#iMes').innerHTML = d.meses.map(m => `<option value="${m}" ${m === (mes || d.mesProximo) ? 'selected' : ''}>${nMes(m)}</option>`).join('');
+  $('#iMonto').value = ''; $('#iFecha').value = d.hoy; $('#iFile').value = ''; $('#iNota').value = '';
+  dIsaac.showModal(); $('#iMonto').focus();
+}
+$('#iGuardar').onclick = async () => {
+  const b = $('#iGuardar');
+  if (!(+$('#iMonto').value > 0)) return toast('Escribe el monto.', true);
+  cargando(b, true);
+  try {
+    const archivo = await leerArchivo($('#iFile').files[0]);
+    pintarAdmin(await api('registrarPagoIsaac', {mes: $('#iMes').value, monto: +$('#iMonto').value, fecha: $('#iFecha').value, archivo, notas: $('#iNota').value}));
+    dIsaac.close(); toast('Pago a Isaac guardado.');
+  } catch(e){ toast(msg(e), true); }
+  cargando(b, false);
+};
+async function borrarIsaac(id, b){
+  if (!segundoToque(b)) return;
+  try { pintarAdmin(await api('borrarPagoIsaac', id)); toast('Pago a Isaac borrado.'); } catch(e){ toast(msg(e), true); }
+}
+async function guardarMonto(b){
+  const n = +$('#aMonto').value;
+  if (n === ADM.monto) return toast('Es el mismo monto.');
+  if (!segundoToque(b)) return;
+  try { pintarAdmin(await api('guardarMonto', n)); toast('Cuota cambiada a ' + rd(n) + '.'); } catch(e){ toast(msg(e), true); }
+}
+const PAGA_HINT = {'Compañero': 'Paga cada mes y firma contrato.', 'Nómina': 'Empleado de la Fundación: Ana María lo descuenta de nómina. Firma contrato. Se marca solo.', 'Fundación': 'Lo cubre la Fundación: se marca solo y no lleva contrato.'};
+function pagaCambio(){
+  const v = $('#fMemb').Paga.value;
+  $('#mPagaHint').textContent = PAGA_HINT[v] || '';
+  $('#mContrato').style.display = mId && v !== 'Fundación' ? '' : 'none';
+}
 
 let pSel = new Set(), pMemb = null;
 function abrirPago(id, mes){
@@ -537,11 +642,13 @@ function editarMemb(id){
   mId = id || '';
   const f = $('#fMemb');
   f.Estado.innerHTML = ADM.estados.map(s => `<option>${s}</option>`).join('');
+  f.Paga.innerHTML = ADM.paga.map(s => `<option>${s}</option>`).join('');
   ['Nombre','Rol','Trato','Estado','Telefono','Correo','CuentaClaude','InicioCobro','ContratoFirmado','Notas'].forEach(k => f[k].value = m[k] || '');
+  f.Paga.value = m.Paga || 'Compañero';
   $('#mTit').textContent = id ? m.Nombre : 'Nueva membresía';
   $('#mSub').textContent = id ? 'ID ' + m.ID + ' · inscrito ' + (m.FechaInscripcion || '—') : 'Para alguien que no llenó el formulario o una membresía adicional.';
   $('#mBorrar').style.display = id ? '' : 'none';
-  $('#mContrato').style.display = id ? '' : 'none';
+  pagaCambio();
   dMemb.showModal();
 }
 function activar(id){
@@ -553,7 +660,7 @@ function activar(id){
 $('#fMemb').onsubmit = async e => {
   e.preventDefault();
   const b = $('#fMemb button[type=submit]'), f = e.target, o = {ID: mId};
-  ['Nombre','Rol','Trato','Estado','Telefono','Correo','CuentaClaude','InicioCobro','ContratoFirmado','Notas'].forEach(k => o[k] = f[k].value);
+  ['Nombre','Rol','Trato','Estado','Telefono','Correo','CuentaClaude','InicioCobro','ContratoFirmado','Notas','Paga'].forEach(k => o[k] = f[k].value);
   cargando(b, true);
   try { pintarAdmin(await api('guardarMembresia', o)); dMemb.close(); toast('Membresía guardada.'); }
   catch(err){ toast(msg(err), true); }
@@ -564,6 +671,7 @@ $('#mBorrar').onclick = async () => {
   try { pintarAdmin(await api('borrarMembresia', mId)); dMemb.close(); toast('Membresía borrada.'); } catch(e){ toast(msg(e), true); }
 };
 $('#mContrato').onclick = () => { dMemb.close(); verContrato(mId); };
+$('#fMemb').Paga.onchange = pagaCambio;
 
 function verContrato(id){
   $('#docC').innerHTML = window.htmlContrato(memb(id), ADM.hoy); // plantilla en Contrato.html (solo Administración)
@@ -590,7 +698,7 @@ function copiarLink(){
 }
 
 // Apps Script envuelve este script en una función: los onclick="" del HTML solo ven lo que esté en window
-Object.assign(window, {ir, agregarAdmin, quitarAdmin, editarMemb, activar, abrirPago, accionPago, copiarLink, verContrato, cerrarContrato, dPago, dMemb});
+Object.assign(window, {ir, agregarAdmin, quitarAdmin, editarMemb, activar, abrirPago, accionPago, copiarLink, verContrato, cerrarContrato, abrirIsaac, borrarIsaac, guardarMonto, dPago, dMemb, dIsaac});
 
 iniciar();
 const VISTA = document.body.dataset.vista || new URLSearchParams(location.search).get('v') || '';
