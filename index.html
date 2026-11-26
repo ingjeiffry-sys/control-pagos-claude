@@ -173,7 +173,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:34px 0 40px
 }
 </style>
 </head>
-<body data-admin="false" data-vista="">
+<body data-admin="false" data-vista="" data-correo="">
 <div class="wrap">
   <header>
     <div class="brand">
@@ -282,7 +282,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:34px 0 40px
 
   
 
-  <footer>Control de Pagos Claude · Prof. Jeiffry García · Coordinación TIC<br><a href="https://script.google.com/a/macros/tears.org/s/AKfycbwpf4CfR0Gd1qOc5_iugbsOeE3cUL0r40TkNccN0swhSxSA3jXdv-R0kltrE1a9Ogba/exec" target="_top">Administración (cuentas @tears.org)</a></footer>
+  <footer>Control de Pagos Claude · Prof. Jeiffry García · Coordinación TIC<br><span id="cuentaVista"></span><a href="https://script.google.com/a/macros/tears.org/s/AKfycbwpf4CfR0Gd1qOc5_iugbsOeE3cUL0r40TkNccN0swhSxSA3jXdv-R0kltrE1a9Ogba/exec" target="_top">Administración (cuentas @tears.org)</a></footer>
 </div>
 
 <!-- Diálogo de pago -->
@@ -704,6 +704,11 @@ iniciar();
 const VISTA = document.body.dataset.vista || new URLSearchParams(location.search).get('v') || '';
 if (['inscripcion','comprobante','estado'].includes(VISTA)) ir(VISTA);
 else if (ES_ADMIN) ir('admin');
+// En la URL de Apps Script, decir con qué cuenta entró quien no es administrador (Google usa la cuenta por defecto del navegador)
+if (!ES_ADMIN && window.google && google.script) {
+  const c = document.body.dataset.correo;
+  $('#cuentaVista').innerHTML = (c ? `Entraste como <b>${esc(c)}</b>: esa cuenta no está en la lista de administradores.` : 'No se detectó una cuenta <b>@tears.org</b>: Google abrió la página con otra cuenta (la predeterminada del navegador) o sin sesión.') + '<br>';
+}
 </script>
 </body>
 </html>
