@@ -195,6 +195,7 @@ footer{color:var(--muted);font-size:12.5px;text-align:center;padding:34px 0 40px
   </nav>
 
   <!-- INICIO -->
+  <div class="card" id="avisoCuenta" style="display:none;margin-bottom:16px;border-color:var(--cafe);background:var(--cafe-soft)"></div>
   <section id="inicio" class="on">
     <div class="hero">
       <div class="card">
@@ -367,6 +368,8 @@ const nMes = m => MESES[+m.slice(5,7)-1] + ' ' + m.slice(0,4);
 const nMesC = m => MESES[+m.slice(5,7)-1].slice(0,3) + ' ' + m.slice(2,4);
 const rd = n => 'RD$ ' + Number(n).toLocaleString('es-DO');
 // Dentro de Apps Script: google.script.run. En GitHub Pages: fetch sin cookies a la API (doPost).
+// /a/macros/tears.org/ obliga a Google a usar la cuenta tears.org aunque el navegador tenga otra como predeterminada
+const URL_ADMIN = 'https://script.google.com/a/macros/tears.org/s/AKfycbwpf4CfR0Gd1qOc5_iugbsOeE3cUL0r40TkNccN0swhSxSA3jXdv-R0kltrE1a9Ogba/exec';
 const API_URL = 'https://script.google.com/macros/s/AKfycbwpf4CfR0Gd1qOc5_iugbsOeE3cUL0r40TkNccN0swhSxSA3jXdv-R0kltrE1a9Ogba/exec';
 const api = (fn, ...a) => (window.google && google.script)
   ? new Promise((ok, ko) => google.script.run.withSuccessHandler(ok).withFailureHandler(ko)[fn](...a))
@@ -519,6 +522,7 @@ function pintarAdmin(d){
   $('#aAdmins').innerHTML = [`<div class="sol"><div><b>${esc(d.dueno)}</b> <span class="muted small">· dueño</span></div></div>`]
     .concat(d.adminsExtra.map(c => `<div class="sol"><div><b>${esc(c)}</b></div>${d.esDueno ? `<button class="btn danger sm" onclick="quitarAdmin('${esc(c)}', this)">Quitar</button>` : ''}</div>`)).join('');
   $('#aAdminAdd').style.display = d.esDueno ? '' : 'none';
+  $('#aAdminUrl').value = URL_ADMIN;
   pintarTabla();
 }
 function pintarTabla(){
@@ -707,6 +711,12 @@ else if (ES_ADMIN) ir('admin');
 // En la URL de Apps Script, decir con qué cuenta entró quien no es administrador (Google usa la cuenta por defecto del navegador)
 if (!ES_ADMIN && window.google && google.script) {
   const c = document.body.dataset.correo;
+  const av = $('#avisoCuenta');
+  av.innerHTML = `<h3>¿Eres administrador y no ves «Administración»?</h3>
+    <p class="small" style="margin:4px 0 12px">${c ? `Google abrió la página con <b>${esc(c)}</b>, que no está en la lista de administradores.` : 'Google abrió la página sin tu cuenta <b>@tears.org</b> (usó otra cuenta del navegador o ninguna).'} Entra con tu cuenta de la organización:</p>
+    <div class="row"><a class="btn pri" target="_top" href="${URL_ADMIN}">Entrar con mi cuenta @tears.org</a>
+    <a class="btn" target="_top" href="https://accounts.google.com/AccountChooser?continue=${encodeURIComponent(URL_ADMIN)}">Elegir otra cuenta de Google</a></div>`;
+  av.style.display = '';
   $('#cuentaVista').innerHTML = (c ? `Entraste como <b>${esc(c)}</b>: esa cuenta no está en la lista de administradores.` : 'No se detectó una cuenta <b>@tears.org</b>: Google abrió la página con otra cuenta (la predeterminada del navegador) o sin sesión.') + '<br>';
 }
 </script>
